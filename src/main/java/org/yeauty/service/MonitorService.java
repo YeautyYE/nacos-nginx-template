@@ -10,7 +10,7 @@ public interface MonitorService {
     String PLACEHOLDER = "@{placeholder}";
     String PLACEHOLDER_SERVER = "@{placeholder_server}";
     String UPSTREAM_REG = "upstream\\s*" + PLACEHOLDER + "\\s*\\{[^}]+\\}";
-    String UPSTREAM_FOMAT = "upstream " + PLACEHOLDER + " {\n " + PLACEHOLDER_SERVER + "}";
+    String UPSTREAM_FOMAT = "upstream " + PLACEHOLDER + " {\n" + PLACEHOLDER_SERVER + "}";
 
     String NGINX_CMD = "nginx.cmd";
     String NGINX_CONFIG = "nginx.config";

@@ -5,6 +5,8 @@ import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yeauty.pojo.DiscoverConfigBO;
 import org.yeauty.service.MonitorService;
 
@@ -19,6 +21,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MonitorServiceImpl implements MonitorService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MonitorServiceImpl.class);
 
     @Override
     public void updateNginxFromNacos(File configFile) throws IOException, InterruptedException, NacosException {
@@ -80,20 +84,20 @@ public class MonitorServiceImpl implements MonitorService {
                             Process process = Runtime.getRuntime().exec(cmd + " -t");
                             int result = process.waitFor();
                             if (result != 0) {
-                                System.out.println("nginx syntax incorrect");
+                                logger.error("nginx syntax incorrect , execute [{}] to get detail ", (cmd + " -t"));
                                 return;
                             }
                             //nginx reload
                             process = Runtime.getRuntime().exec(cmd + " -s reload");
                             result = process.waitFor();
                             if (result != 0) {
-                                System.out.println("nginx reload incorrect");
+                                logger.error("nginx reload incorrect , execute [{}] to get detail ", (cmd + " -s reload"));
+                                return;
                             }
-                            System.out.println(configBO.getServiceName() + " refresh success!");
+                            logger.info(configBO.getServiceName() + " refresh success!");
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
                     }
             );
         }
@@ -146,8 +150,8 @@ public class MonitorServiceImpl implements MonitorService {
 
             //替换原有的upstream
             conf = matcher.replaceAll(newUpstream);
-        }else {
-            throw new IllegalArgumentException("can not found proxy_pass:"+nginxProxyPass);
+        } else {
+            throw new IllegalArgumentException("can not found proxy_pass:" + nginxProxyPass);
         }
 
         try {

@@ -17,13 +17,8 @@ import java.util.concurrent.CountDownLatch;
 public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
-    static String PLACEHOLDER = "@{placeholder}";
-    static String PLACEHOLDER_SERVER = "@{placeholder_server}";
-    static String UPSTREAM_REG = "upstream\\s*" + PLACEHOLDER + "\\s*\\{[^}]+\\}";
-    static String UPSTREAM_FOMAT = "upstream " + PLACEHOLDER + " {\n " + PLACEHOLDER_SERVER + " \n}";
 
     public static void main(String[] args) throws IOException, InterruptedException, NacosException {
-
         //获取config路径
         StartupService startupService = new StartupServiceImpl();
         Map<String, String> map = startupService.argsToMap(args);
@@ -45,7 +40,7 @@ public class Main {
         MonitorService monitorService = new MonitorServiceImpl();
         monitorService.updateNginxFromNacos(file);
 
-        System.out.println("nacos-nginx-template start up!");
+        logger.info("nacos-nginx-template start up!");
 
         new CountDownLatch(1).await();
     }
