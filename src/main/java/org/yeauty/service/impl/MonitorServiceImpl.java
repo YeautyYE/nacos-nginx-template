@@ -139,6 +139,10 @@ public class MonitorServiceImpl implements MonitorService {
             String newUpstream = UPSTREAM_FOMAT.replace(PLACEHOLDER, nginxProxyPass);
             StringBuffer servers = new StringBuffer();
             for (Instance instance : instances) {
+                //不健康或不可用的跳过
+                if (!instance.isHealthy()||!instance.isEnabled()){
+                    continue;
+                }
                 String ip = instance.getIp();
                 int port = instance.getPort();
                 servers.append(formatSymbol + "    server " + ip + ":" + port + ";\n");
