@@ -24,6 +24,8 @@ public class MonitorServiceImpl implements MonitorService {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitorServiceImpl.class);
 
+    private static final String DEFAULT_SERVER =  "127.0.0.1:65535";
+
     @Override
     public void updateNginxFromNacos(File configFile) throws IOException, InterruptedException, NacosException {
         Properties pro = new Properties();
@@ -138,18 +140,22 @@ public class MonitorServiceImpl implements MonitorService {
             //拼接新的upstream
             String newUpstream = UPSTREAM_FOMAT.replace(PLACEHOLDER, nginxProxyPass);
             StringBuffer servers = new StringBuffer();
-            for (Instance instance : instances) {
-                //不健康或不可用的跳过
-                if (!instance.isHealthy()||!instance.isEnabled()){
-                    continue;
+            if (instances.size() > 0) {
+                for (Instance instance : instances) {
+                    //不健康或不可用的跳过
+                    if (!instance.isHealthy() || !instance.isEnabled()) {
+                        continue;
+                    }
+                    String ip = instance.getIp();
+                    int port = instance.getPort();
+                    servers.append(formatSymbol + "    server " + ip + ":" + port + ";\n");
                 }
-                String ip = instance.getIp();
-                int port = instance.getPort();
-                servers.append(formatSymbol + "    server " + ip + ":" + port + ";\n");
             }
-            if (servers.length() > 0) {
-                servers.append(formatSymbol);
+            if (servers.length()==0){
+                //如果没有对应的服务，使用默认的服务防止nginx报错
+                servers.append(formatSymbol + "    server "+DEFAULT_SERVER+";\n");
             }
+            servers.append(formatSymbol);
             newUpstream = newUpstream.replace(PLACEHOLDER_SERVER, servers.toString());
 
             //替换原有的upstream
@@ -157,7 +163,6 @@ public class MonitorServiceImpl implements MonitorService {
         } else {
             throw new IllegalArgumentException("can not found proxy_pass:" + nginxProxyPass);
         }
-
         try {
             FileWriter fileWriter = new FileWriter(file, false);
             fileWriter.write(conf);
