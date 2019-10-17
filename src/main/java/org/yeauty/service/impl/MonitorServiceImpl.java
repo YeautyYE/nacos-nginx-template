@@ -105,7 +105,7 @@ public class MonitorServiceImpl implements MonitorService {
                 logger.warn("incorrect parameter :{} ", RELOAD_INTERVAL);
             }
             while (true) {
-                if (lastReloadTime.get() == 0L || System.currentTimeMillis() - lastReloadTime.get() < interval) {
+                if (lastReloadTime.get() == 0L || (System.currentTimeMillis() - lastReloadTime.get()) < interval) {
                     try {
                         TimeUnit.MILLISECONDS.sleep(interval);
                         continue;
@@ -128,6 +128,7 @@ public class MonitorServiceImpl implements MonitorService {
                         logger.error("nginx reload incorrect , execute [{}] to get detail ", (cmd + " -s reload"));
                         return;
                     }
+                    lastReloadTime.set(0L);
                     logger.info("nginx reload success!");
                 } catch (Exception e) {
                     logger.error("reload nginx throw exception", e);
