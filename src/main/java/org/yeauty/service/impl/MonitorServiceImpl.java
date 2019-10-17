@@ -86,6 +86,7 @@ public class MonitorServiceImpl implements MonitorService {
                             List<Instance> instances = namingService.getAllInstances(configBO.getServiceName());
                             //更新nginx中的proxy_pass
                             refreshProxyPass(instances, configBO.getProxyPass(), configBO.getConfigPath());
+                            lastReloadTime.set(System.currentTimeMillis());
                             logger.info("proxy_pass:{} update success!", configBO.getServiceName());
                         } catch (Exception e) {
                             e.printStackTrace();
