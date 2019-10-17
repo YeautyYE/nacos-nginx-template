@@ -17,13 +17,14 @@
 
 2. #### 配置config.properties
 
-| 参数                     | 描述                                     | 例子                                                  |
-| ------------------------ | ---------------------------------------- | ----------------------------------------------------- |
-| nginx.cmd                | nginx命令的全路径                        | /usr/sbin/nginx                                       |
-| nacos.addr               | nacos的地址                              | 172.16.0.100:8848,172.16.0.101:8848,172.16.0.102:8848 |
-| nacos.service-name.{num} | nacos服务名; {num}从0开始递增            | com.nacos.service.impl.NacosService                   |
-| nginx.config.{num}       | 需要修改nginx配置的路径;{num}从0开始递增 | /etc/nginx/nginx.conf                                 |
-| nginx.proxy-pass.{num}   | nginx中proxy_pass的名字;{num}从0开始递增 | nacos-service                                         |
+| 参数                     | 描述                                           | 例子                                                  |
+| ------------------------ | ---------------------------------------------- | ----------------------------------------------------- |
+| nginx.cmd                | nginx命令的全路径                              | /usr/sbin/nginx                                       |
+| nacos.addr               | nacos的地址                                    | 172.16.0.100:8848,172.16.0.101:8848,172.16.0.102:8848 |
+| reload-interval          | nginx reload命令执行间隔时间（ms  默认值1000） | 1000                                                  |
+| nacos.service-name.{num} | nacos服务名; {num}从0开始递增                  | com.nacos.service.impl.NacosService                   |
+| nginx.config.{num}       | 需要修改nginx配置的路径;{num}从0开始递增       | /etc/nginx/nginx.conf                                 |
+| nginx.proxy-pass.{num}   | nginx中proxy_pass的名字;{num}从0开始递增       | nacos-service                                         |
 
 3. #### 启动
 

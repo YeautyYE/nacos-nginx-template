@@ -17,6 +17,7 @@ public interface MonitorService {
     String NGINX_PROXY_PASS = "nginx.proxy-pass";
     String NACOS_ADDR = "nacos.addr";
     String NACOS_SERVICE_NAME = "nacos.service-name";
+    String RELOAD_INTERVAL = "reload-interval";
 
     void updateNginxFromNacos(File configFile) throws IOException, InterruptedException, NacosException;
 }

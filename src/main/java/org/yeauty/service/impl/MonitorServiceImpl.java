@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +26,9 @@ public class MonitorServiceImpl implements MonitorService {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitorServiceImpl.class);
 
-    private static final String DEFAULT_SERVER =  "127.0.0.1:65535";
+    private static final String DEFAULT_SERVER = "127.0.0.1:65535";
+
+    private AtomicLong lastReloadTime = new AtomicLong(0);
 
     @Override
     public void updateNginxFromNacos(File configFile) throws IOException, InterruptedException, NacosException {
@@ -82,27 +86,53 @@ public class MonitorServiceImpl implements MonitorService {
                             List<Instance> instances = namingService.getAllInstances(configBO.getServiceName());
                             //更新nginx中的proxy_pass
                             refreshProxyPass(instances, configBO.getProxyPass(), configBO.getConfigPath());
-                            //尝试nginx -t ,查看是否有语法错误 0正确 1错误
-                            Process process = Runtime.getRuntime().exec(cmd + " -t");
-                            int result = process.waitFor();
-                            if (result != 0) {
-                                logger.error("nginx syntax incorrect , execute [{}] to get detail ", (cmd + " -t"));
-                                return;
-                            }
-                            //nginx reload
-                            process = Runtime.getRuntime().exec(cmd + " -s reload");
-                            result = process.waitFor();
-                            if (result != 0) {
-                                logger.error("nginx reload incorrect , execute [{}] to get detail ", (cmd + " -s reload"));
-                                return;
-                            }
-                            logger.info(configBO.getServiceName() + " refresh success!");
+                            logger.info("proxy_pass:{} update success!", configBO.getServiceName());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
             );
         }
+
+        //开启线程定时reload
+        new Thread(() -> {
+            String intervalStr = pro.getProperty(RELOAD_INTERVAL, "0");
+            long interval = 1000;
+            try {
+                interval = Long.parseLong(intervalStr);
+            } catch (NumberFormatException e) {
+                logger.warn("incorrect parameter :{} ", RELOAD_INTERVAL);
+            }
+            while (true) {
+                if (lastReloadTime.get() == 0L || System.currentTimeMillis() - lastReloadTime.get() < interval) {
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(interval);
+                        continue;
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                try {
+                    //尝试nginx -t ,查看是否有语法错误 0正确 1错误
+                    Process process = Runtime.getRuntime().exec(cmd + " -t");
+                    int result = process.waitFor();
+                    if (result != 0) {
+                        logger.error("nginx syntax incorrect , execute [{}] to get detail ", (cmd + " -t"));
+                        return;
+                    }
+                    //nginx reload
+                    process = Runtime.getRuntime().exec(cmd + " -s reload");
+                    result = process.waitFor();
+                    if (result != 0) {
+                        logger.error("nginx reload incorrect , execute [{}] to get detail ", (cmd + " -s reload"));
+                        return;
+                    }
+                    logger.info("nginx reload success!");
+                } catch (Exception e) {
+                    logger.error("reload nginx throw exception", e);
+                }
+            }
+        }).start();
 
     }
 
@@ -151,9 +181,9 @@ public class MonitorServiceImpl implements MonitorService {
                     servers.append(formatSymbol + "    server " + ip + ":" + port + ";\n");
                 }
             }
-            if (servers.length()==0){
+            if (servers.length() == 0) {
                 //如果没有对应的服务，使用默认的服务防止nginx报错
-                servers.append(formatSymbol + "    server "+DEFAULT_SERVER+";\n");
+                servers.append(formatSymbol + "    server " + DEFAULT_SERVER + ";\n");
             }
             servers.append(formatSymbol);
             newUpstream = newUpstream.replace(PLACEHOLDER_SERVER, servers.toString());
