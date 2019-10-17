@@ -97,7 +97,7 @@ public class MonitorServiceImpl implements MonitorService {
 
         //开启线程定时reload
         new Thread(() -> {
-            String intervalStr = pro.getProperty(RELOAD_INTERVAL, "0");
+            String intervalStr = pro.getProperty(RELOAD_INTERVAL);
             long interval = 1000;
             try {
                 interval = Long.parseLong(intervalStr);
