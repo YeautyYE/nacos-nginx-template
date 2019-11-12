@@ -1,8 +1,8 @@
 package org.yeauty.service;
 
 import com.alibaba.nacos.api.exception.NacosException;
+import org.tomlj.TomlParseResult;
 
-import java.io.File;
 import java.io.IOException;
 
 public interface MonitorService {
@@ -12,12 +12,13 @@ public interface MonitorService {
     String UPSTREAM_REG = "upstream\\s*" + PLACEHOLDER + "\\s*\\{[^}]+\\}";
     String UPSTREAM_FOMAT = "upstream " + PLACEHOLDER + " {\n" + PLACEHOLDER_SERVER + "}";
 
-    String NGINX_CMD = "nginx.cmd";
-    String NGINX_CONFIG = "nginx.config";
-    String NGINX_PROXY_PASS = "nginx.proxy-pass";
-    String NACOS_ADDR = "nacos.addr";
-    String NACOS_SERVICE_NAME = "nacos.service-name";
-    String RELOAD_INTERVAL = "reload-interval";
+    String NGINX_CMD = "nginx_cmd";
+    String NACOS_ADDR = "nacos_addr";
 
-    void updateNginxFromNacos(File configFile) throws IOException, InterruptedException, NacosException;
+    String NGINX_CONFIG = "nginx_config";
+    String NGINX_UPSTREAM = "nginx_upstream";
+    String NACOS_SERVICE_NAME = "nacos_service_name";
+    String RELOAD_INTERVAL = "reload_interval";
+
+    void updateNginxFromNacos(TomlParseResult result) throws IOException, InterruptedException, NacosException;
 }

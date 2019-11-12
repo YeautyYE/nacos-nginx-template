@@ -3,12 +3,12 @@ package org.yeauty.pojo;
 public class DiscoverConfigBO {
 
     private String configPath;
-    private String proxyPass;
+    private String upstream;
     private String serviceName;
 
-    public DiscoverConfigBO(String configPath, String proxyPass, String serviceName) {
+    public DiscoverConfigBO(String configPath, String upstream, String serviceName) {
         this.configPath = configPath;
-        this.proxyPass = proxyPass;
+        this.upstream = upstream;
         this.serviceName = serviceName;
     }
 
@@ -16,7 +16,7 @@ public class DiscoverConfigBO {
     public String toString() {
         return "DiscoverConfigBO{" +
                 "configPath='" + configPath + '\'' +
-                ", proxyPass='" + proxyPass + '\'' +
+                ", upstream='" + upstream + '\'' +
                 ", serviceName='" + serviceName + '\'' +
                 '}';
     }
@@ -29,12 +29,12 @@ public class DiscoverConfigBO {
         this.configPath = configPath;
     }
 
-    public String getProxyPass() {
-        return proxyPass;
+    public String getUpstream() {
+        return upstream;
     }
 
-    public void setProxyPass(String proxyPass) {
-        this.proxyPass = proxyPass;
+    public void setUpstream(String upstream) {
+        this.upstream = upstream;
     }
 
     public String getServiceName() {
