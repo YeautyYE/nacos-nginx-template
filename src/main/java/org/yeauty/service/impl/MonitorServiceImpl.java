@@ -119,6 +119,8 @@ public class MonitorServiceImpl implements MonitorService {
                     logger.warn("incorrect parameter :{} ", RELOAD_INTERVAL);
                 }
             }
+            Process process = null;
+            boolean result = false;
             while (true) {
                 if (lastReloadTime.get() == 0L || (System.currentTimeMillis() - lastReloadTime.get()) < interval) {
                     try {
@@ -130,18 +132,26 @@ public class MonitorServiceImpl implements MonitorService {
                 }
                 try {
                     //尝试nginx -t ,查看是否有语法错误 0正确 1错误
-                    Process process = Runtime.getRuntime().exec(cmd + " -t");
-                    int result = process.waitFor();
-                    if (result != 0) {
+                    process = Runtime.getRuntime().exec(cmd + " -t");
+                    result = process.waitFor(10, TimeUnit.SECONDS);
+                    if (!result) {
+                        logger.error("nginx timeout , execute [{}] to get detail ", (cmd + " -t"));
+                        continue;
+                    }
+                    if (process.exitValue() != 0) {
                         logger.error("nginx syntax incorrect , execute [{}] to get detail ", (cmd + " -t"));
-                        return;
+                        continue;
                     }
                     //nginx reload
                     process = Runtime.getRuntime().exec(cmd + " -s reload");
-                    result = process.waitFor();
-                    if (result != 0) {
+                    result = process.waitFor(10, TimeUnit.SECONDS);
+                    if (!result) {
+                        logger.error("nginx timeout , execute [{}] to get detail ", (cmd + " -t"));
+                        continue;
+                    }
+                    if (process.exitValue() != 0) {
                         logger.error("nginx reload incorrect , execute [{}] to get detail ", (cmd + " -s reload"));
-                        return;
+                        continue;
                     }
                     lastReloadTime.set(0L);
                     logger.info("nginx reload success!");
@@ -149,7 +159,7 @@ public class MonitorServiceImpl implements MonitorService {
                     logger.error("reload nginx throw exception", e);
                 }
             }
-        }).start();
+        }, "reload-nginx").start();
 
     }
 
