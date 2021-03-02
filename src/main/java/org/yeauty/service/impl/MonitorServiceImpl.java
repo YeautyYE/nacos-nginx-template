@@ -204,7 +204,8 @@ public class MonitorServiceImpl implements MonitorService {
                     }
                     String ip = instance.getIp();
                     int port = instance.getPort();
-                    servers.append(formatSymbol + "    server " + ip + ":" + port + ";\n");
+                    int weight = new Double(instance.getWeight()).intValue();
+                    servers.append(formatSymbol + "    server " + ip + ":" + port + " weight=" + weight + ";\n");
                 }
             }
             if (servers.length() == 0) {
