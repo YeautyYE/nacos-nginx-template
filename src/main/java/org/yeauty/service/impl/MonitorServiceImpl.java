@@ -18,6 +18,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -62,17 +63,32 @@ public class MonitorServiceImpl implements MonitorService {
 
         //判断nacos地址
         String nacosAddr = tomlParseResult.getString(NACOS_ADDR);
+        String nacosUsername = tomlParseResult.getString(NACOS_USERNAME);
+        String nacosPassword = tomlParseResult.getString(NACOS_PASSWORD);
         if (StringUtils.isEmpty(nacosAddr)) {
             throw new IllegalArgumentException(NACOS_ADDR + " is empty");
         }
-        NamingService namingService = NacosFactory.createNamingService(nacosAddr);
+        Properties properties = new Properties();
+        properties.put("serverAddr", nacosAddr);
+
+        if (StringUtils.isNotEmpty(nacosUsername) && StringUtils.isNotEmpty(nacosPassword)) {
+            properties.put("username", nacosUsername);
+            properties.put("password", nacosPassword);
+        }
+
+        NamingService namingService = NacosFactory.createNamingService(properties);
+        logger.info("server status : {}",namingService.getServerStatus());
 
         //获取配置项
         List<DiscoverConfigBO> list = new ArrayList<>();
         int num = 0;
         Set<String> groupNames = tomlParseResult.keySet();
         groupNames.stream()
-                .filter(groupName -> !groupName.equals(NGINX_CMD) && !groupName.equals(NACOS_ADDR) && !groupName.equals(RELOAD_INTERVAL))
+                .filter(groupName -> !groupName.equals(NGINX_CMD)
+                        && !groupName.equals(NACOS_ADDR)
+                        && !groupName.equals(NACOS_USERNAME)
+                        && !groupName.equals(NACOS_PASSWORD)
+                        && !groupName.equals(RELOAD_INTERVAL))
                 .forEach(groupName -> {
                     String configPath = tomlParseResult.getString(groupName + "." + NGINX_CONFIG);
                     String upstream = tomlParseResult.getString(groupName + "." + NGINX_UPSTREAM);
