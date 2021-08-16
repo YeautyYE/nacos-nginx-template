@@ -1,0 +1,15 @@
+nginx_cmd = "/usr/sbin/nginx"
+nacos_addr = "172.16.0.100:8848,172.16.0.101:8848,172.16.0.102:8848"
+#nacos_username = "账号，没有则不填"
+#nacos_password = "密码，没有则不填"
+reload_interval = 1000
+
+[discover_config1]
+nginx_config = "/etc/nginx/nginx.conf"
+nginx_upstream = "upsteam1"
+nacos_service_name = "service1"
+
+[discover_config2]
+nginx_config = "/etc/nginx/nginx.conf"
+nginx_upstream = "upsteam2"
+nacos_service_name = "service2"
